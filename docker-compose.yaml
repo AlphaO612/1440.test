@@ -41,6 +41,7 @@ services:
     environment:
       DATABASE_URL: postgresql://service_tickets_1440:i2TOOIMQxuz91c7Yc@postgres:5432/tickets_1440
       REDIS_URL: redis://redis:6379/0
+      URL_AUTH: https://discord.com/oauth2/authorize?client_id=775047814911623179&response_type=code&redirect_uri=https%3A%2F%2F1440.arefaste.ru&scope=identify+guilds+email+connections
     ports:
       - "8000:8000"
     depends_on:

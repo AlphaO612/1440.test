@@ -3,9 +3,19 @@ from http import HTTPStatus
 from pydantic import BaseModel, Field
 
 
-class ErrorAnswer(BaseModel):
+class BaseModel_http(BaseModel):
+    _status_code = HTTPStatus.OK
+    @property
+    def code(self):
+        return self._status_code
+
+class ErrorAnswer(BaseModel_http):
     status_code: HTTPStatus = Field(description="Код http ответа(ошибки)")
     description: str = Field(description="Описание ошибки")
+
+    @property
+    def code(self):
+        return self.status_code
 
 
 class Response(BaseModel):
@@ -20,5 +30,3 @@ class Response(BaseModel):
         GetTicket,
         SearchTickets
     ] = Field(description="Ответ на запрос")
-
-

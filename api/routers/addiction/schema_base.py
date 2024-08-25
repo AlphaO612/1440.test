@@ -11,5 +11,14 @@ class ErrorAnswer(BaseModel):
 class Response(BaseModel):
     # metadata: Dict[str, Any] = Field(description="Вводные параметры")
     success: bool = Field(description="Успешно ли выполнен запрос или нет")
-    response: Union[ErrorAnswer, BaseModel] = Field(description="Ответ на запрос")
+    response: Union[
+        ErrorAnswer,
+        AuthResponseGET,
+        AuthResponsePOST,
+        OpenTicket,
+        ChangeState,
+        GetTicket,
+        SearchTickets
+    ] = Field(description="Ответ на запрос")
+
 

@@ -16,14 +16,17 @@ class AuthResponsePOST(BaseModel):
     def serialize_expire_in(self, expire_in: datetime, _info):
         return expire_in.timestamp()
 
-
     @field_serializer('access_token')
-    def serialize_expire_in(self, access_token, _info):
+    def serialize_access_token(self, access_token, _info):
         return str(access_token)
 
 
 class OpenTicket(BaseModel):
     ticket_guid: UUID = Field(description="Айди открытой заявки")
+
+    @field_serializer('ticket_guid')
+    def serialize_ticket_guid(self, ticket_guid, _info):
+        return str(ticket_guid)
 
 class ChangeState(BaseModel):
     timestamp_action: datetime = Field(description="Временная отметка завершения действия")
@@ -36,6 +39,14 @@ class GetTicket(BaseModel):
     author: int = Field(description="Айди пользователя, создавшего запрошенную заявка")
     current_state: str = Field(description="Текущий статус ошибки")
     history_actions: List[Dict] = Field(description="История изменений заявки")
+
+    @field_serializer('dt_created')
+    def serialize_dt_created(self, dt_created: datetime, _info):
+        return dt_created.timestamp()
+
+    @field_serializer('ticket_guid')
+    def serialize_ticket_guid(self, ticket_guid, _info):
+        return str(ticket_guid)
 
 class SearchTickets(BaseModel):
     tickets: List[Dict] = Field(description="Список подходящих найденных заявок")

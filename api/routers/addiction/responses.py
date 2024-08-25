@@ -1,14 +1,15 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, HttpUrl, Field, field_serializer
+from pydantic import HttpUrl, Field, field_serializer
+from schema_base import BaseModel_http
 
 
-class AuthResponseGET(BaseModel):
+class AuthResponseGET(BaseModel_http):
     link: HttpUrl = Field(description="Ссылка для аутентификация через OAuth 2.0 от Discord")
 
 
-class AuthResponsePOST(BaseModel):
+class AuthResponsePOST(BaseModel_http):
     access_token: UUID = Field(description="Токен, при помощи которого можно осуществлять использование API сервиса заявок")
     expire_in: datetime = Field(description="Временная метка, до которой будет работать токен")
 
@@ -21,19 +22,19 @@ class AuthResponsePOST(BaseModel):
         return str(access_token)
 
 
-class OpenTicket(BaseModel):
+class OpenTicket(BaseModel_http):
     ticket_guid: UUID = Field(description="Айди открытой заявки")
 
     @field_serializer('ticket_guid')
     def serialize_ticket_guid(self, ticket_guid, _info):
         return str(ticket_guid)
 
-class ChangeState(BaseModel):
+class ChangeState(BaseModel_http):
     timestamp_action: datetime = Field(description="Временная отметка завершения действия")
     previus_state: str = Field(description="Прошлый статус заявки")
     current_state: str = Field(description="Текущей изменнёный статус заявки")
 
-class GetTicket(BaseModel):
+class GetTicket(BaseModel_http):
     ticket_guid: UUID = Field(description="Айди заявки")
     dt_created: datetime = Field(description="Дата время создания заявки")
     author: int = Field(description="Айди пользователя, создавшего запрошенную заявка")
@@ -48,5 +49,5 @@ class GetTicket(BaseModel):
     def serialize_ticket_guid(self, ticket_guid, _info):
         return str(ticket_guid)
 
-class SearchTickets(BaseModel):
+class SearchTickets(BaseModel_http):
     tickets: List[Dict] = Field(description="Список подходящих найденных заявок")

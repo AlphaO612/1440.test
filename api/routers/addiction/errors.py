@@ -21,3 +21,8 @@ WRONG_CHANGE_STATE = ErrorAnswer(
     description="You can't change the old state to the same state it was before."
 )
 
+NOT_FOUND_TICKET = ErrorAnswer(
+    status_code=HTTPStatus.NOT_FOUND,
+    description="The requested ticket with the entered 'ticket_guid' doesn't exists!"
+)
+

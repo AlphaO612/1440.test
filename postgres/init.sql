@@ -46,7 +46,8 @@ INSERT INTO "type_enum" (type)
 VALUES ('open_ticket'),
        ('log_in'),
        ('change_state'),
-       ('error')
+       ('error'),
+       ('get_tickets')
 ON CONFLICT (type) DO NOTHING;
 
 -- todo It can't be done, cuz u won't be able to enter ticket text! but interesting code ^-^

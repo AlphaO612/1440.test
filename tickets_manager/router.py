@@ -27,59 +27,6 @@ def response_format(func):
     return wrapped
 
 
-def finish_task(session):
-    def get_func(func):
-        def wrapped(*args, **kwargs):
-            data = dict(
-                metadata=kwargs['request_data'],
-                success=True,
-                response=dict()
-            )
-            try:
-                data['response'] = func(*args, **kwargs)
-            except HTTPError as e:
-                data['success'] = False
-                data['response'] = dict(
-                    code='UNAUTHORIZED',
-                    request=dict(
-                        url=str(e.request.url),
-                        method=str(e.request.method),
-                        headers=dict(e.request.headers),
-                        body=str(e.request.body)
-                    ), args=e.args, response=e.response.json())
-            except (TypeError, AssertionError) as e:
-                data['success'] = False
-                data['response'] = dict(
-                    code='BAD_REQUEST',
-                    description=e.args[0])
-            except AttributeError as e:
-                data['success'] = False
-                data['response'] = dict(
-                    code='UNAUTHORIZED',
-                    response=e.args[1])
-            except Exception as e:
-                data['success'] = False
-                data['response'] = dict(
-                    code='INTERNAL_ERROR',
-                    response=e.args[0])
-            finally:
-                data['metadata'].update(dict(
-                    timestamp_action=int(datetime.datetime.now().timestamp())
-                ))
-                model = ActionsLogs.add(
-                    guid=data['metadata']['guid_action'],
-                    **data
-                )
-                # assert model is None  # todo УБРАТЬ, а если появилось ошибка, то тут проблема!!!!!!!
-            session.commit()
-
-            return model.dict()
-
-        return wrapped
-
-    return get_func
-
-
 class Discord:
     API_ENDPOINT = 'https://discord.com/api/v10'
     CLIENT_ID = os.getenv("CLIENT_ID")
@@ -134,6 +81,58 @@ class Discord:
         return found_user
 
 
+def finish_task(session):
+    def get_func(func):
+        def wrapped(*args, **kwargs):
+            data = dict(
+                metadata=kwargs['request_data'],
+                success=True,
+                response=dict()
+            )
+            try:
+                data['response'] = func(*args, **kwargs)
+            except HTTPError as e:
+                data['success'] = False
+                data['response'] = dict(
+                    code='UNAUTHORIZED',
+                    request=dict(
+                        url=str(e.request.url),
+                        method=str(e.request.method),
+                        headers=dict(e.request.headers),
+                        body=str(e.request.body)
+                    ), args=e.args, response=e.response.json())
+            except (TypeError, AssertionError) as e:
+                data['success'] = False
+                data['response'] = dict(
+                    code='BAD_REQUEST',
+                    description=e.args[0])
+            except AttributeError as e:
+                data['success'] = False
+                data['response'] = dict(
+                    code='UNAUTHORIZED',
+                    response=e.args[1])
+            # except Exception as e:
+            #     data['success'] = False
+            #     data['response'] = dict(
+            #         code='INTERNAL_ERROR',
+            #         response=e.args[0])
+            finally:
+                data['metadata'].update(dict(
+                    timestamp_action=int(datetime.datetime.now().timestamp())
+                ))
+                model = ActionsLogs.add(
+                    guid=data['metadata']['guid_action'],
+                    **data
+                )
+            session.commit()
+
+            return model.dict()
+
+        return wrapped
+
+    return get_func
+
+
 class Reaction:
     # engine = create_async_engine(
     #     DATABASE_URL,
@@ -162,8 +161,8 @@ class Reaction:
             existed_user = cls.session.query(DataClasses.User).filter_by(id=user_data['id']).first()
             if existed_user is not None:
                 existed_user.access_token = token_data["access_token"]
-                existed_user.dt_token_update = int(datetime.datetime.now().timestamp()),
-                existed_user.expire_in = token_data['expires_in']
+                existed_user.dt_token_update = datetime.datetime.now().timestamp(),
+                existed_user.expire_in = datetime.timedelta(seconds=token_data['expires_in'])
             else:
                 cls.session.add(
                     DataClasses.User(
@@ -210,9 +209,9 @@ class Reaction:
                 type=DataClasses.TypeAction.open_ticket,
                 guid_ticket=guid,
                 author=user_id,
-                data=json.dumps(dict(
+                data=dict(
                     text=request_data.get("text")
-                ), ensure_ascii=True)
+                )
             )
         )
         return obj
@@ -251,6 +250,17 @@ class Reaction:
 
                 old_status = obj.status.value
                 obj.status = request_data['new_status']
+                cls.session.add(
+                    DataClasses.Actions(
+                        type=TypeAction.change_state,
+                        guid_ticket=request_data['guid_ticket'],
+                        author=user_id,
+                        data=dict(
+                            old_status=old_status,
+                            new_status=request_data['new_status']
+                        )
+                    )
+                )
                 return dict(
                     author=user_id,
                     old_status=old_status,
@@ -259,3 +269,48 @@ class Reaction:
 
             raise TypeError("Ticket with entered guid_ticket does not exist!")
         raise TypeError("Status can't be entered because it's not in the list of allowed ticket statuses!")
+
+    @classmethod
+    @finish_task(session)
+    def get_tickets(cls, request_data):
+        """
+        Данный метод призван возвращать данные о заявках с фильтрацией
+        :param request_data: коллекция с нужными параметрами для выполнения запроса.
+            Обязательные ключи: access_token, guid_action, guid_ticket, author, dt_created, status
+        :return: dict либо ошибку
+        """
+        user_id = Discord.get_idInDB(request_data['access_token'], session=cls.session)
+        # todo заменить на декоратор общий, чтобы он обогощал requests_data
+        if request_data.get('status', None) is not None:
+            if request_data['status'] not in [action.value for action in DataClasses.StatusTicket]:
+                raise TypeError("Status must be in the list of allowed status")
+
+        filter_dict = {}
+        for key in ["guid_ticket", "author", "status"]:
+            value = request_data.get(key, None)
+            if value is not None:
+                filter_dict[key] = value
+
+        tickets_lst = cls.session.query(DataClasses.Tickets).filter_by(
+            **filter_dict
+        ).all()
+
+        relevant_tickets = []
+        for ticket in tickets_lst:
+            a = dict(
+                guid_ticket=ticket.guid_ticket,
+                author=ticket.author,
+                status=ticket.status,
+                actions=[
+                    dict(
+                        author=action.author,
+                        guid_ticket=str(action.guid_ticket),
+                        timestamp=int(action.timestamp.timestamp()),
+                        type=action.type.value,
+                        data=action.data
+                    )
+                    for action in ticket.actions
+                ]
+            )
+            relevant_tickets.append(a)
+        return dict(relevant_tickets=relevant_tickets)

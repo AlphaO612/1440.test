@@ -40,6 +40,7 @@ class TypeAction(enum.Enum):
     open_ticket = "open_ticket"
     change_state = "change_state"
     error = 'error'
+    get_tickets = 'get_tickets'
 
 TypeAction_lst = []
 

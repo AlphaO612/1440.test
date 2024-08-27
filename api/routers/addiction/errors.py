@@ -23,6 +23,6 @@ WRONG_CHANGE_STATE = ErrorAnswer(
 
 NOT_FOUND_TICKET = ErrorAnswer(
     status_code=HTTPStatus.NOT_FOUND,
-    description="The requested ticket with the entered 'ticket_guid' doesn't exists!"
+    description="The requested ticket with the entered 'guid_ticket' doesn't exists!"
 )
 

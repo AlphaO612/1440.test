@@ -1,5 +1,5 @@
 # postgres/Dockerfile
-LABEL authors="arefaSte"
 
-FROM postgres:11.5-alpine
+
+FROM postgres:latest
 COPY init.sql /docker-entrypoint-initdb.d/

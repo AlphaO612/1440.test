@@ -35,8 +35,8 @@ class Action(BaseModel):
     @classmethod
     def create(cls,
                _type: TypeAction,
-               author: int,
                data: dict,
+               author: Optional[int] = None,
                guid_action: Union[None, str, UUID] = None
                ):
         if guid_action is None:

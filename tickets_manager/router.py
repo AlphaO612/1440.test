@@ -193,7 +193,7 @@ class Reaction:
         :return: dict либо ошибку
         """
         user_id = Discord.get_idInDB(request_data['access_token'], session=cls.session)
-        # todo заменить на декоратор общий, чтобы он обогощал requests_data
+        
         guid = request_data.get("guid_ticket", uuid.uuid4())
         obj = dict(
             guid_ticket=guid,
@@ -237,7 +237,7 @@ class Reaction:
         :return: dict либо ошибку
         """
         user_id = Discord.get_idInDB(request_data['access_token'], session=cls.session)
-        # todo заменить на декоратор общий, чтобы он обогощал requests_data
+        
         if 'guid_ticket' not in request_data:
             raise TypeError("guid_ticket not in data")
         if 'new_status' not in request_data:
@@ -280,7 +280,7 @@ class Reaction:
         :return: dict либо ошибку
         """
         user_id = Discord.get_idInDB(request_data['access_token'], session=cls.session)
-        # todo заменить на декоратор общий, чтобы он обогощал requests_data
+        
         if request_data.get('status', None) is not None:
             if request_data['status'] not in [action.value for action in DataClasses.StatusTicket]:
                 raise TypeError("Status must be in the list of allowed status")

@@ -49,21 +49,22 @@ VALUES ('open_ticket'),
        ('error')
 ON CONFLICT (type) DO NOTHING;
 
-CREATE OR REPLACE FUNCTION insert_into_actions()
-RETURNS TRIGGER AS $$
-BEGIN
-
-    INSERT INTO Actions (author, type, guid_ticket, data)
-    VALUES (NEW.author, 'open_ticket', NEW.guid_ticket, NULL);
-
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER trigger_insert_into_actions
-AFTER INSERT ON Tickets
-FOR EACH ROW
-EXECUTE FUNCTION insert_into_actions();
+-- todo It can't be done, cuz u won't be able to enter ticket text! but interesting code ^-^
+-- CREATE OR REPLACE FUNCTION insert_into_actions()
+-- RETURNS TRIGGER AS $$
+-- BEGIN
+--
+--     INSERT INTO Actions (author, type, guid_ticket, data)
+--     VALUES (NEW.author, 'open_ticket', NEW.guid_ticket, NULL);
+--
+--     RETURN NEW;
+-- END;
+-- $$ LANGUAGE plpgsql;
+--
+-- CREATE TRIGGER trigger_insert_into_actions
+-- AFTER INSERT ON Tickets
+-- FOR EACH ROW
+-- EXECUTE FUNCTION insert_into_actions();
 
 -- todo It can't be done, cuz u won't be able to verify the person who did it! but interesting code ^-^
 -- CREATE OR REPLACE FUNCTION update_tickets_status()

@@ -14,5 +14,6 @@ class paths:
         notifications = lambda: "queue:notifications"
 
     class logs:
-        actions = lambda guid_action: "logs:actions:{guid_action}"
-        notifications = lambda guid_action: "logs:notifications:{guid_action}"
+        actions = lambda guid_action: "logs:actions:{guid_action}".format(guid_action=guid_action)
+        notifications = lambda guid_action: "logs:notifications:{guid_action}".format(guid_action=guid_action)
+

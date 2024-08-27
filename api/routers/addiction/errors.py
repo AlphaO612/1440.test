@@ -26,3 +26,7 @@ NOT_FOUND_TICKET = ErrorAnswer(
     description="The requested ticket with the entered 'guid_ticket' doesn't exists!"
 )
 
+INTERNAL_ERROR = ErrorAnswer(
+    status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+    description="Something goes wrong! Check service logs!"
+)

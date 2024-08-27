@@ -1,0 +1,8 @@
+redis
+fastapi
+aiohttp
+requests
+pydantic
+sqlalchemy
+cryptography
+psycopg2-binary

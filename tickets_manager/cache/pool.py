@@ -13,7 +13,9 @@ class Pool:
     path: str = paths.queue.actions()
 
     def tasks(self) -> list[str]:
-        return list(map(lambda x: json.loads(x), self.red.brpop([self.path])))
+        item = self.red.brpop([self.path])[1::2]
+
+        return list(map(lambda x: json.loads(x), item))
 
     @classmethod
     def add(cls, obj: BaseModel):

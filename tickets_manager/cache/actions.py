@@ -12,7 +12,8 @@ class TypeAction(Enum):
     log_in = 'log_in'
     open_ticket = "open_ticket"
     change_state = "change_state"
-    # error = 'error'
+    error = 'error'
+    get_tickets = 'get_tickets'
 
 class StatusTicket(Enum):
     open = "open"

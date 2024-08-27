@@ -11,6 +11,7 @@ router = {
     TypeAction.log_in: Reaction.log_in,
     TypeAction.change_state: Reaction.change_state,
     TypeAction.open_ticket: Reaction.open_ticket,
+    TypeAction.get_tickets: Reaction.get_tickets,
 }
 
 
@@ -19,7 +20,7 @@ async def main():
 
     async def handler(task_dict):
         action = Action(**task_dict)
-        func: Union[Reaction.log_in, Reaction.open_ticket, Reaction.change_state] = None
+        func: Union[Reaction.log_in, Reaction.open_ticket, Reaction.change_state, Reaction.get_tickets] = None
         for enum, func_handle in router.items():
             if enum.value == action.type.value:
                 func = func_handle

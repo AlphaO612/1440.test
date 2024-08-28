@@ -6,3 +6,4 @@ pydantic
 sqlalchemy
 cryptography
 psycopg2-binary
+httpx

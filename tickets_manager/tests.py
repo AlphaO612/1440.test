@@ -32,6 +32,7 @@ class LogIn(unittest.TestCase):
             guid_action=guid
         )
         catcher = asyncio.run(ActionsLogs.catch(guid, timeout=1))
+        print("response = ", catcher.response)
         self.assertEqual(catcher.success, True)
         print("ACCESS_TOKEN = ", catcher.response['access_token'])
 

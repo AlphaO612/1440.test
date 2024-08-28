@@ -1,4 +1,7 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
+
+from routers.verify import verify_token
+from routers import auth, ticket
 
 description = """
 Данное api для сервиса работы с микросервисом Ticket компании 1440.test.
@@ -83,6 +86,22 @@ app = FastAPI(
     }
 )
 
+app.include_router(
+    auth.router,
+    prefix="/api/discord",
+    tags=["OAuth2.0"]
+)
 
+app.include_router(
+    ticket.router,
+    dependencies=[Depends(verify_token)],
+    prefix="/api/tickets",
+    tags=["Tickets"]
+)
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="127.0.0.1", port=8000)
 
 

@@ -27,6 +27,7 @@ class AES:
 
 class EncryptedValue(TypeDecorator):
     impl = String
+    cache_ok = False
 
     def process_bind_param(self, value, dialect):
         return AES.encrypt(value)
@@ -58,7 +59,7 @@ class User(Base):
 
     id = Column(String(53), primary_key=True)
     access_token = Column(
-        EncryptedValue(53)
+        EncryptedValue(255)
     )
     dt_token_update = Column(TIMESTAMP(timezone=True))
     expire_in = Column(Interval)

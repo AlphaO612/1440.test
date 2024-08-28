@@ -33,12 +33,15 @@ services:
 
   nginx:
     restart: always
-    image: nginx:latest
+
+    build:
+      context: ./nginx/
+      dockerfile: Dockerfile
     container_name: nginx
     ports:
       - "80:80"
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx:/etc/nginx/conf.d
     hostname: nginx.arefaste
     networks:
         - 1440-net
@@ -52,12 +55,18 @@ services:
       dockerfile: Dockerfile
     container_name: api
     environment:
-      DATABASE_URL: postgresql://service_tickets_1440:i2TOOIMQxuz91c7Yc@postgres:5432/tickets_1440
-      REDIS_URL: redis://redis:6379/0
-      URL_AUTH: https://discord.com/oauth2/authorize?client_id=775047814911623179&response_type=code&redirect_uri=https%3A%2F%2F1440.arefaste.ru&scope=identify+guilds+email+connections
+      DATABASE_URL: postgresql://service_tickets_1440:i2TOOIMQxuz91c7Yc@postgres.arefaste:5432/tickets_1440
       CLIENT_ID: 775047814911623179
       CLIENT_SECRET: kHUES88yPuknC0Rrp0NVl8IMmHHqll2L
+      HOST_REDIS: redis.arefaste
+      PWD_REDIS:
+      URL_AUTH: https://discord.com/oauth2/authorize?client_id=775047814911623179&response_type=code&redirect_uri=https%3A%2F%2F1440.arefaste.ru&scope=identify+guilds+email+connections
+      REDIRECT_URI: https://1440.arefaste.ru
     hostname: api.arefaste
+    links:
+      - postgres
+      - redis
+      - tickets_manager
     networks:
         - 1440-net
 
@@ -90,18 +99,18 @@ services:
     depends_on:
       - redis
 
-  tickets_notificator:
-    build:
-      context: ./tickets_notificator
-      dockerfile: Dockerfile
-    container_name: tickets_notificator
-    environment:
-      REDIS_URL: redis://redis:6379/0
-    hostname: tickets_notificator.arefaste
-    networks:
-        - 1440-net
-    depends_on:
-      - redis
+#  tickets_notificator:
+#    build:
+#      context: ./tickets_notificator
+#      dockerfile: Dockerfile
+#    container_name: tickets_notificator
+#    environment:
+#      REDIS_URL: redis://redis:6379/0
+#    hostname: tickets_notificator.arefaste
+#    networks:
+#        - 1440-net
+#    depends_on:
+#      - redis
 
 volumes:
   redis_data:

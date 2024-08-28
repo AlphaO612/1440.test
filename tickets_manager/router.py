@@ -12,6 +12,7 @@ from sqlalchemy.orm import sessionmaker, Session
 
 from cache import ActionsPool, ActionsLogs, NotificationsLogs, Action
 from orm import DataClasses
+from orm.data_cls import AES
 
 TypeAction = DataClasses.TypeAction
 DATABASE_URL = os.getenv("DATABASE_URL")
@@ -161,7 +162,7 @@ class Reaction:
             existed_user = cls.session.query(DataClasses.User).filter_by(id=user_data['id']).first()
             if existed_user is not None:
                 existed_user.access_token = token_data["access_token"]
-                existed_user.dt_token_update = datetime.datetime.now().timestamp(),
+                existed_user.dt_token_update = datetime.datetime.now(),
                 existed_user.expire_in = datetime.timedelta(seconds=token_data['expires_in'])
             else:
                 cls.session.add(
@@ -276,7 +277,7 @@ class Reaction:
         """
         Данный метод призван возвращать данные о заявках с фильтрацией
         :param request_data: коллекция с нужными параметрами для выполнения запроса.
-            Обязательные ключи: access_token, guid_action, guid_ticket, author, dt_created, status
+            Обязательные ключи: access_token, guid_action, guid_ticket, author, status
         :return: dict либо ошибку
         """
         user_id = Discord.get_idInDB(request_data['access_token'], session=cls.session)
